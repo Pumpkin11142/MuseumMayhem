@@ -38,6 +38,7 @@ public class MatchmakingRoomPlayer : NetworkRoomPlayer
     public void RequestSetReady(bool ready)
     {
         if (!isOwned)
+        if (!hasAuthority)
             return;
 
         CmdChangeReadyState(ready);

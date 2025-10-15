@@ -30,6 +30,7 @@ The steps below assume you already imported Mirror 96.0.1 into your Unity 6 proj
    - **Players Per Match**: type the same number you set in **Max Connections** (for example, `2`).
    - **Match Start Delay**: type how many seconds you want to show a "Match found" message before loading the gameplay scene (for example, `2`).
 > **Important:** The `NetworkManager` GameObject must be present in the Main Menu scene. Do not duplicate it in the Gameplay scene. Mirror keeps the object alive when scenes change. The UI script automatically finds the manager even after Unity moves it to `DontDestroyOnLoad` during play mode.
+> **Important:** The `NetworkManager` GameObject must be present in the Main Menu scene. Do not duplicate it in the Gameplay scene. Mirror keeps the object alive when scenes change.
 
 ---
 
@@ -75,10 +76,13 @@ Mirror keeps a lightweight “room player” object for each connection while pl
 7. (Optional) **Manager Poll Interval**: this controls how often (in seconds) the script retries finding the manager while Mirror is still starting up. The default `0.25` works well; only lower it if you have very long-loading singletons and want faster rechecks.
 8. Set **Server Address** to the IP or domain of the server that will host matches. For local testing on one machine, leave it at `localhost`.
 9. Decide whether you want the Unity Editor to auto-host when you click **Play**:
+5. Set **Server Address** to the IP or domain of the server that will host matches. For local testing on one machine, leave it at `localhost`.
+6. Decide whether you want the Unity Editor to auto-host when you click **Play**:
    - Leave **Start Host In Editor** checked to make the editor instance become the host automatically when you press the Ready button.
    - Uncheck it if you prefer to run a separate dedicated server even while testing.
 
 > When a player clicks Ready, the script first connects to the server. If it is running inside the Unity Editor and **Start Host In Editor** is enabled, it will start hosting automatically. Once connected, clicking Ready toggles the ready state. The button text switches between “Ready Up” and “Cancel”, and the status label explains what is happening. Mirror 96 replaces the older `hasAuthority` property with `isOwned`; the scripts already use the new property so no additional changes are needed on your end.
+> When a player clicks Ready, the script first connects to the server. If it is running inside the Unity Editor and **Start Host In Editor** is enabled, it will start hosting automatically. Once connected, clicking Ready toggles the ready state. The button text switches between “Ready Up” and “Cancel”, and the status label explains what is happening.
 
 ---
 
@@ -110,6 +114,7 @@ Mirror keeps a lightweight “room player” object for each connection while pl
 5. When running the dedicated server, leave **Start Host In Editor** unchecked on client builds so they only connect as clients.
 6. Keep the `ServerImguiBootstrap` script (located at `Scripts/Handlers-Managers/ServerImguiBootstrap.cs`) in the project. It prevents Unity from stripping the IMGUI module in server builds so Mirror’s internal `OnGUI` method does not trigger runtime errors. Unity 6’s dedicated-server define is `UNITY_DEDICATED_SERVER`; the script already accounts for both that and `UNITY_SERVER`.
 7. Leave the placeholder shaders under `Assets/Shaders/ServerPlaceholders/` in the project. They provide lightweight stand-ins for the TextMeshPro shaders that the main menu UI references, which stops the “Trying to access a shader but no shaders were included…” warnings when Dedicated Server Optimizations strips graphics content.
+6. Keep the `ServerImguiBootstrap` script (located at `Scripts/Handlers-Managers/ServerImguiBootstrap.cs`) in the project. It prevents Unity from stripping the IMGUI module in server builds so Mirror’s internal `OnGUI` method does not trigger runtime errors.
 
 ---
 
