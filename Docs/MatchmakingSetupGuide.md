@@ -30,6 +30,7 @@ The steps below assume you already imported Mirror 96.0.1 into your Unity 6 proj
    - **Players Per Match**: type the same number you set in **Max Connections** (for example, `2`).
    - **Match Start Delay**: type how many seconds you want to show a "Match found" message before loading the gameplay scene (for example, `2`).
 > **Important:** The `NetworkManager` GameObject must be present in the Main Menu scene. Do not duplicate it in the Gameplay scene. Mirror keeps the object alive when scenes change. The UI script automatically finds the manager even after Unity moves it to `DontDestroyOnLoad` during play mode.
+> **Important:** The `NetworkManager` GameObject must be present in the Main Menu scene. Do not duplicate it in the Gameplay scene. Mirror keeps the object alive when scenes change.
 
 ---
 
@@ -76,6 +77,7 @@ Mirror keeps a lightweight “room player” object for each connection while pl
    - Uncheck it if you prefer to run a separate dedicated server even while testing.
 
 > When a player clicks Ready, the script first connects to the server. If it is running inside the Unity Editor and **Start Host In Editor** is enabled, it will start hosting automatically. Once connected, clicking Ready toggles the ready state. The button text switches between “Ready Up” and “Cancel”, and the status label explains what is happening. Mirror 96 replaces the older `hasAuthority` property with `isOwned`; the scripts already use the new property so no additional changes are needed on your end.
+> When a player clicks Ready, the script first connects to the server. If it is running inside the Unity Editor and **Start Host In Editor** is enabled, it will start hosting automatically. Once connected, clicking Ready toggles the ready state. The button text switches between “Ready Up” and “Cancel”, and the status label explains what is happening.
 
 ---
 

@@ -24,6 +24,7 @@ public class MainMenuMatchmakingUI : MonoBehaviour
     void Awake()
     {
         EnsureNetworkManagerReference();
+        networkManager = NetworkManager.singleton;
 
         if (readyButton != null)
         {
@@ -91,6 +92,9 @@ public class MainMenuMatchmakingUI : MonoBehaviour
         if (networkManager == null)
         {
             Debug.LogError("No NetworkManager singleton is available. Ensure a CustomNetworkManager is placed in the startup scene.");
+        if (networkManager == null)
+        {
+            Debug.LogError("No NetworkManager found in the scene.");
             return;
         }
 
@@ -115,6 +119,7 @@ public class MainMenuMatchmakingUI : MonoBehaviour
     void HandleAuthorityStarted(MatchmakingRoomPlayer player)
     {
         if (!player.isOwned)
+        if (!player.hasAuthority)
             return;
 
         if (localRoomPlayer != null)
@@ -225,6 +230,7 @@ public class MainMenuMatchmakingUI : MonoBehaviour
         foreach (MatchmakingRoomPlayer player in players)
         {
             if (player.isOwned)
+            if (player.hasAuthority)
             {
                 HandleAuthorityStarted(player);
                 break;
