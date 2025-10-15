@@ -23,6 +23,7 @@ public class MainMenuMatchmakingUI : MonoBehaviour
 
     void Awake()
     {
+        EnsureNetworkManagerReference();
         networkManager = NetworkManager.singleton;
 
         if (readyButton != null)
@@ -38,6 +39,13 @@ public class MainMenuMatchmakingUI : MonoBehaviour
         UpdateReadyButton(false);
         SetSearchingIndicator(false);
         TryAssignLocalPlayer();
+    }
+
+    void Start()
+    {
+        // When scenes change, the NetworkManager moves to DontDestroyOnLoad.
+        // Grab a fresh reference after the first frame so the singleton is ready.
+        EnsureNetworkManagerReference();
     }
 
     void OnDestroy()
@@ -79,6 +87,11 @@ public class MainMenuMatchmakingUI : MonoBehaviour
 
     void BeginConnection()
     {
+        EnsureNetworkManagerReference();
+
+        if (networkManager == null)
+        {
+            Debug.LogError("No NetworkManager singleton is available. Ensure a CustomNetworkManager is placed in the startup scene.");
         if (networkManager == null)
         {
             Debug.LogError("No NetworkManager found in the scene.");
@@ -105,6 +118,7 @@ public class MainMenuMatchmakingUI : MonoBehaviour
 
     void HandleAuthorityStarted(MatchmakingRoomPlayer player)
     {
+        if (!player.isOwned)
         if (!player.hasAuthority)
             return;
 
@@ -215,11 +229,25 @@ public class MainMenuMatchmakingUI : MonoBehaviour
         MatchmakingRoomPlayer[] players = FindObjectsOfType<MatchmakingRoomPlayer>();
         foreach (MatchmakingRoomPlayer player in players)
         {
+            if (player.isOwned)
             if (player.hasAuthority)
             {
                 HandleAuthorityStarted(player);
                 break;
             }
+        }
+    }
+
+    void EnsureNetworkManagerReference()
+    {
+        if (networkManager != null)
+            return;
+
+        networkManager = NetworkManager.singleton;
+
+        if (networkManager == null)
+        {
+            networkManager = FindObjectOfType<NetworkManager>();
         }
     }
 }
