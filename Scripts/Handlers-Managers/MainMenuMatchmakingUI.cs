@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -17,6 +18,18 @@ public class MainMenuMatchmakingUI : MonoBehaviour
     [Tooltip("Start as a host automatically when playing inside the Unity Editor (useful for testing).")]
     public bool startHostInEditor = true;
 
+    [Header("Network Manager Fallbacks")]
+    [Tooltip("Assign when the UI should talk to a specific NetworkManager instance instead of auto-discovering it.")]
+    public NetworkManager networkManagerOverride;
+    [Tooltip("Instantiate this prefab if no active NetworkManager exists (useful for additive main-menu setups). Leave empty to disable auto-instantiation.")]
+    public NetworkManager networkManagerPrefab;
+    [Tooltip("How often (in seconds) the UI should retry locating the NetworkManager while it is still starting up.")]
+    public float managerPollInterval = 0.25f;
+
+    MatchmakingRoomPlayer localRoomPlayer;
+    NetworkManager networkManager;
+    bool isConnecting;
+    Coroutine locateManagerRoutine;
     MatchmakingRoomPlayer localRoomPlayer;
     NetworkManager networkManager;
     bool isConnecting;
@@ -50,6 +63,12 @@ public class MainMenuMatchmakingUI : MonoBehaviour
 
     void OnDestroy()
     {
+        if (locateManagerRoutine != null)
+        {
+            StopCoroutine(locateManagerRoutine);
+            locateManagerRoutine = null;
+        }
+
         if (readyButton != null)
         {
             readyButton.onClick.RemoveListener(HandleReadyButtonPressed);
@@ -243,6 +262,67 @@ public class MainMenuMatchmakingUI : MonoBehaviour
         if (networkManager != null)
             return;
 
+        TryCaptureNetworkManager();
+
+        if (networkManager == null && locateManagerRoutine == null && managerPollInterval > 0f && isActiveAndEnabled)
+        {
+            locateManagerRoutine = StartCoroutine(PollForNetworkManager());
+        }
+    }
+
+    void TryCaptureNetworkManager()
+    {
+        if (networkManagerOverride != null)
+        {
+            networkManager = networkManagerOverride;
+        }
+
+        if (networkManager != null)
+            return;
+
+        networkManager = NetworkManager.singleton;
+
+        if (networkManager != null)
+            return;
+
+        networkManager = FindObjectOfType<NetworkManager>(true);
+
+        if (networkManager != null)
+            return;
+
+        NetworkManager[] managers = Resources.FindObjectsOfTypeAll<NetworkManager>();
+        foreach (NetworkManager candidate in managers)
+        {
+            if (candidate != null && candidate.gameObject.hideFlags == HideFlags.None)
+            {
+                networkManager = candidate;
+                break;
+            }
+        }
+
+        if (networkManager == null && networkManagerPrefab != null)
+        {
+            networkManager = Instantiate(networkManagerPrefab);
+            networkManager.name = networkManagerPrefab.name;
+            DontDestroyOnLoad(networkManager.gameObject);
+        }
+    }
+
+    IEnumerator PollForNetworkManager()
+    {
+        var wait = new WaitForSeconds(managerPollInterval);
+
+        while (networkManager == null)
+        {
+            TryCaptureNetworkManager();
+
+            if (networkManager != null)
+                break;
+
+            yield return wait;
+        }
+
+        locateManagerRoutine = null;
         networkManager = NetworkManager.singleton;
 
         if (networkManager == null)

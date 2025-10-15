@@ -71,6 +71,11 @@ Mirror keeps a lightweight “room player” object for each connection while pl
    - **Ready Button Label**: drag the TextMeshProUGUI component that shows the button text (for example, the child text object inside the button). If you use the legacy `Text` component instead of TextMeshPro, replace the `TMP_Text` field in the Inspector with your Text component – Unity will handle the conversion.
    - **Status Label**: drag the TextMeshProUGUI (or Text) element that should display messages such as “Looking for another player…”.
    - **Searching Indicator**: drag any spinner or animated GameObject you want to show while waiting. If you do not have one, leave this field empty (the script checks for `null`).
+5. (Optional) **Network Manager Override**: drag the `CustomNetworkManager` component from the Hierarchy into this slot when you want the UI to use a specific manager and skip auto-discovery. Leave empty to let the script find the singleton automatically.
+6. (Optional) **Network Manager Prefab**: assign a prefab containing `CustomNetworkManager` when your main menu scene loads additively and does not already include the manager. The UI spawns this prefab the moment a player clicks Ready if no manager exists. Leave empty in the usual single-scene setup.
+7. (Optional) **Manager Poll Interval**: this controls how often (in seconds) the script retries finding the manager while Mirror is still starting up. The default `0.25` works well; only lower it if you have very long-loading singletons and want faster rechecks.
+8. Set **Server Address** to the IP or domain of the server that will host matches. For local testing on one machine, leave it at `localhost`.
+9. Decide whether you want the Unity Editor to auto-host when you click **Play**:
 5. Set **Server Address** to the IP or domain of the server that will host matches. For local testing on one machine, leave it at `localhost`.
 6. Decide whether you want the Unity Editor to auto-host when you click **Play**:
    - Leave **Start Host In Editor** checked to make the editor instance become the host automatically when you press the Ready button.
@@ -107,6 +112,8 @@ Mirror keeps a lightweight “room player” object for each connection while pl
    - Windows: `GameName.exe -batchmode -nographics`.
    - macOS/Linux: `./GameName.x86_64 -batchmode -nographics`.
 5. When running the dedicated server, leave **Start Host In Editor** unchecked on client builds so they only connect as clients.
+6. Keep the `ServerImguiBootstrap` script (located at `Scripts/Handlers-Managers/ServerImguiBootstrap.cs`) in the project. It prevents Unity from stripping the IMGUI module in server builds so Mirror’s internal `OnGUI` method does not trigger runtime errors. Unity 6’s dedicated-server define is `UNITY_DEDICATED_SERVER`; the script already accounts for both that and `UNITY_SERVER`.
+7. Leave the placeholder shaders under `Assets/Shaders/ServerPlaceholders/` in the project. They provide lightweight stand-ins for the TextMeshPro shaders that the main menu UI references, which stops the “Trying to access a shader but no shaders were included…” warnings when Dedicated Server Optimizations strips graphics content.
 6. Keep the `ServerImguiBootstrap` script (located at `Scripts/Handlers-Managers/ServerImguiBootstrap.cs`) in the project. It prevents Unity from stripping the IMGUI module in server builds so Mirror’s internal `OnGUI` method does not trigger runtime errors.
 
 ---

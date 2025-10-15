@@ -1,3 +1,4 @@
+#if UNITY_SERVER || UNITY_DEDICATED_SERVER
 #if UNITY_SERVER
 using UnityEngine;
 
